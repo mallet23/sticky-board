@@ -9,3 +9,5 @@ Features:
 5. Moving notes to front (in case of overlapping notes).
 6. Saving notes to local storage (restoring them on page load).
 7. Different note colors.
+
+Demo: https://mallet23.github.io/sticky-board/
