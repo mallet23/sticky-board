@@ -1,5 +1,6 @@
 import { action, makeObservable, observable, reaction } from "mobx";
-import { Note, WithPosition } from "../models";
+import { Note, WithPosition, WithSize } from "../models";
+import { createDefaultNote } from "../utils";
 
 const storageKey = "sticky-board";
 
@@ -7,6 +8,7 @@ export class StickBoardStore {
   @observable notes: Note[] = [];
   @observable draggableNoteId?: string;
   draggableStartDelta?: WithPosition;
+  @observable noteToCreate?: Note;
 
   constructor() {
     makeObservable(this);
@@ -16,6 +18,35 @@ export class StickBoardStore {
     }
 
     reaction(() => this.notes, () => this.updateStorage());
+  }
+
+  @action.bound
+  startCreateNote(startPosition: WithPosition) {
+    if(!this.noteToCreate){
+      this.noteToCreate = { ...createDefaultNote(), ...startPosition, width: 0, height: 0 };
+    }
+  };
+
+  @action.bound
+  stopCreateNote() {
+    if (this.noteToCreate) {
+      if(this.noteToCreate.width > 0 && this.noteToCreate.height > 0){
+        this.notes = [...this.notes, this.noteToCreate];
+      }
+      this.noteToCreate = undefined;
+    }
+  };
+
+  @action.bound
+  draggingCreateNote(draggingPosition: WithPosition) {
+    if (this.noteToCreate) {
+      const newSizes: WithSize = {
+        width: draggingPosition.left - this.noteToCreate!.left,
+        height: draggingPosition.top - this.noteToCreate!.top
+      };
+
+      this.noteToCreate = { ...this.noteToCreate, ...newSizes };
+    }
   }
 
   @action.bound

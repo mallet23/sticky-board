@@ -11,6 +11,9 @@ const Base = styled.div`
 interface StickersZoneProps {
   stopDragging: () => void;
   startDragging: (note: Note, startPosition: WithPosition) => void;
+  startCreateNote: (startPosition: WithPosition) => void;
+  draggingCreateNote: (draggingPosition: WithPosition) => void;
+  stopCreateNote: () => void;
   dragging: (cursorPosition: WithPosition) => void;
   onDeleteNote: (note: Note) => void;
   notes: Note[];
@@ -19,6 +22,9 @@ interface StickersZoneProps {
 }
 
 export const StickersZone: React.FC<StickersZoneProps> = ({
+  startCreateNote,
+  stopCreateNote,
+  draggingCreateNote,
   notes,
   startDragging,
   stopDragging,
@@ -27,17 +33,36 @@ export const StickersZone: React.FC<StickersZoneProps> = ({
   dragging,
   onDeleteNote
 }) => {
+  const zoneRef = useRef<HTMLDivElement>(null);
+
   const draggableNoteIdRef = useRef(draggableNoteId);
   draggableNoteIdRef.current = draggableNoteId;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const pageX = e.pageX;
+    const pageY = e.pageY;
     if (draggableNoteIdRef.current) {
-      dragging({ left: e.screenX, top: e.screenY });
+      dragging({ left: pageX, top: pageY });
+    } else {
+      draggingCreateNote({ left: pageX, top: pageY })
     }
-  }, [dragging]);
+  }, [dragging, draggingCreateNote]);
 
+  const handleMouseUp = useCallback(() => {
+    if (draggableNoteIdRef.current) {
+      stopDragging();
+    } else {
+      stopCreateNote();
+    }
+  },[stopCreateNote, stopDragging]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (e.currentTarget === zoneRef.current && !draggableNoteIdRef.current) {
+      startCreateNote({ left: e.pageX, top: e.pageY })
+    }
+  },[startCreateNote]);
   return (
-    <Base onMouseUp={stopDragging} onMouseMove={handleMouseMove}
+    <Base ref={zoneRef} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} onMouseDown={handleMouseDown}
           style={{ cursor: draggableNoteId ? "move" : undefined }}>
       {notes.map(note => (
         <StickyNote onDelete={onDeleteNote} key={note.id} note={note} startDragging={startDragging}

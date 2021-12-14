@@ -11,18 +11,16 @@ const Base = styled.div`
   position: absolute;
   resize: both;
   overflow: auto;
-  min-height: 70px;
-  min-width: 100px;
   color: #ffffff;
 `;
 
 interface StickyNoteProps {
   note: Note;
-  isDraggable: boolean;
-  startDragging: (note: Note, startPosition: WithPosition) => void;
-  stopDragging: () => void;
-  onChange: (id: string, patch: Partial<Note>) => void;
-  onDelete: (note: Note) => void;
+  isDraggable?: boolean;
+  startDragging?: (note: Note, startPosition: WithPosition) => void;
+  stopDragging?: () => void;
+  onChange?: (id: string, patch: Partial<Note>) => void;
+  onDelete?: (note: Note) => void;
 }
 
 export const StickyNote: React.FC<StickyNoteProps> = ({
@@ -34,20 +32,20 @@ export const StickyNote: React.FC<StickyNoteProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const handleResize = useCallback(({ height, width }: DOMRectReadOnly) => {
-    onChange(id, { width, height });
+    onChange?.(id, { width, height });
   }, [onChange, id]);
   useObserveElementResize(ref, handleResize);
 
   const handleStartDragging = useCallback(startPosition => {
-    startDragging(noteRef.current, startPosition);
+    startDragging?.(noteRef.current, startPosition);
   }, [startDragging]);
 
   const handleDescriptionChange = useCallback(description => {
-    onChange(id, { description });
+    onChange?.(id, { description });
   }, [onChange, id]);
 
   const handleDelete = useCallback(() => {
-    onDelete(noteRef.current);
+    onDelete?.(noteRef.current);
   }, [onDelete]);
 
   return (
