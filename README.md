@@ -11,3 +11,5 @@ Features:
 8. Different note colors.
 
 Demo: https://mallet23.github.io/sticky-board/
+
+Required: no more than 6 hours for development 
